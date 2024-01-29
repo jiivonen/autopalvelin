@@ -1,7 +1,9 @@
 const express = require('express');
+const mysql = require('mysql');
 
 const {port, host} = require('./config.json');
-const autot = require('./autot.json');
+const dbconfig = require('./dbconfig.json');
+// const autot = require('./autot.json');
 
 const app = express();
 app.use(express.json());
@@ -21,7 +23,10 @@ newId = () => {
 
 // Määritellään polut
 app.get('/autot', (req, res) => {
-  res.json(autot);
+  const connection = mysql.createConnection(dbconfig);
+  connection.connect();
+  // tähän väliin kyselyn suorittaminen
+  connection.end();
 });
 
 app.get('/autot/:id', (req, res) => {
