@@ -25,23 +25,39 @@ newId = () => {
 app.get('/autot', (req, res) => {
   const connection = mysql.createConnection(dbconfig);
   connection.connect();
-  // tähän väliin kyselyn suorittaminen
+  connection.query(`SELECT merkki, malli, vuosimalli, omistaja
+    FROM auto ORDER BY merkki, malli`,
+    (err, rivit, kentat) => {
+      if (err) {
+        // Tämä kaataa palvelimen jos tulee tietokantavirhe
+        throw err;
+      }
+
+      let vastaus = '';
+      for (let rivi of rivit) {
+        vastaus += `${rivi.merkki} ${rivi.malli}: ${rivi.vuosimalli}, ${rivi.omistaja}<br>`;
+      }
+      res.send(vastaus);
+  });
   connection.end();
 });
 
+/* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.get('/autot/:id', (req, res) => {
   const vastaus = [];
   const haettava =  Number.parseInt(req.params.id);
 
   for (let auto of autot) {
-      if (auto.id === haettava) {
-          vastaus.push(auto);
-      }
+    if (auto.id === haettava) {
+      vastaus.push(auto);
+    }
   }
 
   res.json(vastaus);
 });
+*/
 
+/* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.post('/autot/uusi', (req, res) => {
   // kerätään tiedot pyynnön body-osasta
   const merkki = req.body.merkki;
@@ -76,7 +92,9 @@ app.post('/autot/uusi', (req, res) => {
       res.json(uusi);
   }
 });
+*/
 
+/* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.put('/autot/:id', (req, res) => {
   const id =  Number.parseInt(req.params.id);
   // kerätään tiedot pyynnön body-osasta
@@ -131,7 +149,9 @@ app.put('/autot/:id', (req, res) => {
     }
   }
 });
+*/
 
+/* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.delete('/autot/:id', (req, res) => {
   const poistettava = req.params.id;
   let onOlemassa = false;
@@ -153,6 +173,7 @@ app.delete('/autot/:id', (req, res) => {
     res.status(400).json({'viesti': 'Virhe: Annettua ID-numeroa ei ole olemassa.'});
   }
 });
+*/
 
 // Käynnistetään express-palvelin
 app.listen(port, host, () => {console.log('Autopalvelin kuuntelee')});
