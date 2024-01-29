@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 const {port, host} = require('./config.json');
 const dbconfig = require('./dbconfig.json');
