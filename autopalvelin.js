@@ -5,54 +5,43 @@ const {port, host} = require('./config.json');
 const dbconfig = require('./dbconfig.json');
 // const autot = require('./autot.json');
 
+// Apufunktio getille
+function getCars(res, kysely) {
+  const connection = mysql.createConnection(dbconfig);
+  connection.connect();
+  connection.query(kysely,
+    (err, rivit, kentat) => {
+      if (err) {
+        // Tämä kaataa palvelimen jos tulee tietokantavirhe
+        throw err;
+      }
+
+      let vastaus = '';
+      for (let rivi of rivit) {
+        vastaus += `${rivi.merkki} ${rivi.malli}: ${rivi.vuosimalli}, ${rivi.omistaja}<br>`;
+      }
+      res.send(vastaus);
+  });
+  connection.end();
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Määritellään polut
 app.get('/autot', (req, res) => {
-  const connection = mysql.createConnection(dbconfig);
-  connection.connect();
   const kysely = `SELECT merkki, malli, vuosimalli, omistaja FROM auto ORDER BY merkki, malli`;
-  connection.query(kysely,
-    (err, rivit, kentat) => {
-      if (err) {
-        // Tämä kaataa palvelimen jos tulee tietokantavirhe
-        throw err;
-      }
-
-      let vastaus = '';
-      for (let rivi of rivit) {
-        vastaus += `${rivi.merkki} ${rivi.malli}: ${rivi.vuosimalli}, ${rivi.omistaja}<br>`;
-      }
-      res.send(vastaus);
-  });
-  connection.end();
+  getCars(res, kysely);
 });
 
 app.get('/autot/:id', (req, res) => {
   const haettava =  Number.parseInt(req.params.id);
-
-  const connection = mysql.createConnection(dbconfig);
-  connection.connect();
   const kysely =
     `SELECT merkki, malli, vuosimalli, omistaja
       FROM auto
       WHERE id = ` + haettava;
-  connection.query(kysely,
-    (err, rivit, kentat) => {
-      if (err) {
-        // Tämä kaataa palvelimen jos tulee tietokantavirhe
-        throw err;
-      }
-
-      let vastaus = '';
-      for (let rivi of rivit) {
-        vastaus += `${rivi.merkki} ${rivi.malli}: ${rivi.vuosimalli}, ${rivi.omistaja}<br>`;
-      }
-      res.send(vastaus);
-  });
-  connection.end();
+  getCars(res, kysely);
 });
 
 app.post('/autot/uusi', (req, res) => {
