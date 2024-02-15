@@ -92,7 +92,6 @@ app.post('/autot/uusi', (req, res) => {
   }
 });
 
-/* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.put('/autot/:id', (req, res) => {
   const id =  Number.parseInt(req.params.id);
   // kerätään tiedot pyynnön body-osasta
@@ -114,40 +113,29 @@ app.put('/autot/:id', (req, res) => {
     res.status(400).json({'viesti': 'Virhe: Kaikkia tietoja ei annettu.'});
   }
   else {
-    let onOlemassa = false;
-    let uusi = {};
+    const connection = mysql.createConnection(dbconfig);
+    connection.connect();
 
-    // Etsitään muokattava henkilö ja muokataan arvot
-    for (let auto of autot) {
-      if (auto.id == id) {
-        auto.merkki = merkki;
-        auto.malli = malli;
-        auto.vuosimalli = vuosimalli;
-        auto.omistaja = omistaja;
-
-        onOlemassa = true;
-
-        uusi = {
-          id: id,
-          merkki: merkki,
-          malli: malli,
-          vuosimalli: vuosimalli,
-          omistaja: omistaja,
-        };
+    // suoritetaan kysely
+    connection.query(
+      `UPDATE auto SET merkki = ?, malli = ?, vuosimalli = ?, omistaja = ?
+        WHERE id = ?`, [merkki, malli, vuosimalli, omistaja, id],
+      (err, result) => {
+        if (err) {
+          // Tämä kaataa palvelimen
+          throw err;
+        }
+        if (result.affectedRows == 0) {
+          res.status(404).send('Autoa id ' + id + ' ei löydy');
+        }
+        else {
+          res.send('Auto ' + id + ' muokattu');
+        }
       }
-    }
-
-    // Tarkistetaan onnistuiko muokkaaminen
-    if (!onOlemassa) {
-      res.status(400).json({"viesti": "Virhe: Tuntematon auto."});
-    }
-    else {
-      // lähetetään onnistumisviesti
-      res.json(uusi);
-    }
+    );
+    connection.end();
   }
 });
-*/
 
 /* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.delete('/autot/:id', (req, res) => {
