@@ -1,5 +1,5 @@
 create table auto (
-	id INT,
+	id INT auto_increment primary key,
 	merkki VARCHAR(50),
 	malli VARCHAR(50),
 	vuosimalli INT,

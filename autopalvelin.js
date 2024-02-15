@@ -9,18 +9,6 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Apufunktiot
-newId = () => {
-  let max = 0;
-  for (let auto of autot) {
-    if (auto.id > max) {
-      max = auto.id;
-    }
-  }
-
-  return max + 1;
-};
-
 // Määritellään polut
 app.get('/autot', (req, res) => {
   const connection = mysql.createConnection(dbconfig);
@@ -67,7 +55,6 @@ app.get('/autot/:id', (req, res) => {
   connection.end();
 });
 
-/* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.post('/autot/uusi', (req, res) => {
   // kerätään tiedot pyynnön body-osasta
   const merkki = req.body.merkki;
@@ -86,23 +73,24 @@ app.post('/autot/uusi', (req, res) => {
     res.status(400).json({'viesti': 'Virhe: Kaikkia tietoja ei annettu.'});
   }
   else {
-      // luodaan tiedoilla uusi olio
-      const uusi = {
-          id: newId(),
-          merkki: merkki,
-          malli: malli,
-          vuosimalli: vuosimalli,
-          omistaja: omistaja,
-      };
+    const connection = mysql.createConnection(dbconfig);
+    connection.connect();
 
-      // lisätään olio työntekijöiden taulukkoon
-      autot.push(uusi);
-
-      // lähetetään onnistumisviesti
-      res.json(uusi);
+    // suoritetaan kysely
+    connection.query(
+      `INSERT INTO auto (merkki, malli, vuosimalli, omistaja)
+      VALUES (?, ?, ?, ?)`, [merkki, malli, vuosimalli, omistaja],
+      (err, result) => {
+        if (err) {
+          // Tämä kaataa palvelimen
+          throw err;
+        }
+        res.send('Auto lisätty');
+      }
+    );
+    connection.end();
   }
 });
-*/
 
 /* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.put('/autot/:id', (req, res) => {
