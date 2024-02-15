@@ -137,29 +137,30 @@ app.put('/autot/:id', (req, res) => {
   }
 });
 
-/* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.delete('/autot/:id', (req, res) => {
   const poistettava = req.params.id;
-  let onOlemassa = false;
 
-  for (let i = 0; i < autot.length; i++) {
-    if (autot[i].id == poistettava) {
-      autot.splice(i, 1);
-      onOlemassa = true;
+  const connection = mysql.createConnection(dbconfig);
+  connection.connect();
 
-      // korjaus indeksinumeroon poistamisen jälkeen, jotta ei hypätä yhden henkilön yli
-      i--;
+  // suoritetaan kysely
+  connection.query(
+    `DELETE FROM auto WHERE id = ?`, [parseInt(poistettava)],
+    (err, result) => {
+      if (err) {
+        // Tämä kaataa palvelimen
+        throw err;
+      }
+      if (result.affectedRows == 0) {
+        res.status(404).send('Autoa id ' + poistettava + ' ei löydy');
+      }
+      else {
+        res.send('Auto ' + poistettava + ' poistettu');
+      }
     }
-  }
-
-  if (onOlemassa) {
-    res.json({'viesti': 'Auto poistettu.'});
-  }
-  else {
-    res.status(400).json({'viesti': 'Virhe: Annettua ID-numeroa ei ole olemassa.'});
-  }
+  );
+  connection.end();
 });
-*/
 
 // Käynnistetään express-palvelin
 app.listen(port, host, () => {console.log('Autopalvelin kuuntelee')});
