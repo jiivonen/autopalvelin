@@ -139,6 +139,12 @@ app.put('/autot/:id', (req, res) => {
 
 app.delete('/autot/:id', (req, res) => {
   const poistettava = req.params.id;
+  const id = parseInt(poistettava);
+
+  if (isNaN(id)) {
+    res.status(400).send('Auto id ' + poistettava + ' on väärää tyyppiä.');
+    return;
+  }
 
   const connection = mysql.createConnection(dbconfig);
   connection.connect();
