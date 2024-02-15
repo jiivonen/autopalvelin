@@ -25,8 +25,8 @@ newId = () => {
 app.get('/autot', (req, res) => {
   const connection = mysql.createConnection(dbconfig);
   connection.connect();
-  connection.query(`SELECT merkki, malli, vuosimalli, omistaja
-    FROM auto ORDER BY merkki, malli`,
+  const kysely = `SELECT merkki, malli, vuosimalli, omistaja FROM auto ORDER BY merkki, malli`;
+  connection.query(kysely,
     (err, rivit, kentat) => {
       if (err) {
         // Tämä kaataa palvelimen jos tulee tietokantavirhe
@@ -42,20 +42,30 @@ app.get('/autot', (req, res) => {
   connection.end();
 });
 
-/* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.get('/autot/:id', (req, res) => {
-  const vastaus = [];
   const haettava =  Number.parseInt(req.params.id);
 
-  for (let auto of autot) {
-    if (auto.id === haettava) {
-      vastaus.push(auto);
-    }
-  }
+  const connection = mysql.createConnection(dbconfig);
+  connection.connect();
+  const kysely =
+    `SELECT merkki, malli, vuosimalli, omistaja
+      FROM auto
+      WHERE id = ` + haettava;
+  connection.query(kysely,
+    (err, rivit, kentat) => {
+      if (err) {
+        // Tämä kaataa palvelimen jos tulee tietokantavirhe
+        throw err;
+      }
 
-  res.json(vastaus);
+      let vastaus = '';
+      for (let rivi of rivit) {
+        vastaus += `${rivi.merkki} ${rivi.malli}: ${rivi.vuosimalli}, ${rivi.omistaja}<br>`;
+      }
+      res.send(vastaus);
+  });
+  connection.end();
 });
-*/
 
 /* kommentoitu pois, koska ei käytä vielä tietokantaa
 app.post('/autot/uusi', (req, res) => {
